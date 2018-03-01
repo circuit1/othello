@@ -14,13 +14,16 @@ Player::Player(Side side) {
      * precalculating things, etc.) However, remember that you will only have
      * 30 seconds.
      */
-    Board *board = new Board();
+    board = new Board();
     //board position score = (# stones you have) - (# stones your opponent has)
     Side opponent = WHITE;
     if (side == WHITE) {
         opponent = BLACK;
     }
     position_score = board->count(side) - board->count(opponent);
+
+    // Set the side parameter
+    s = side;
 }
 
 /*
@@ -48,9 +51,21 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
      * process the opponent's opponents move before calculating your own move
      */
 
-    if (opponentsMove == nullptr) {
-        
-
+    // Randomly pick a valid move 
+    if (board->hasMoves(s))
+    {
+        int moved = 0;
+        while (moved == 0)
+        {
+            int rand_x = rand() % 8;
+            int rand_y = rand() % 8;
+            Move m = Move(rand_x, rand_y);
+            if (board->checkMove(&m, s))
+            {
+                board->doMove(&m, s);
+                moved = 1;
+            }
+        }
     }
 
     return nullptr;

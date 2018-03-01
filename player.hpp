@@ -1,6 +1,7 @@
 #ifndef __PLAYER_H__
 #define __PLAYER_H__
 
+#include <cstdlib>
 #include <iostream>
 #include "common.hpp"
 #include "board.hpp"
@@ -9,6 +10,8 @@ using namespace std;
 class Player {
 private:
 	int position_score;
+	Side s;
+	Board *board;
 public:
     Player(Side side);
     ~Player();
