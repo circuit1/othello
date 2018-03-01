@@ -17,7 +17,7 @@ Player::Player(Side side) {
     Board *board = new Board();
     //board position score = (# stones you have) - (# stones your opponent has)
     Side opponent = WHITE;
-    if (side == WHITE){
+    if (side == WHITE) {
         opponent = BLACK;
     }
     position_score = board->count(side) - board->count(opponent);
@@ -47,5 +47,11 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
      * TODO: Implement how moves your AI should play here. You should first
      * process the opponent's opponents move before calculating your own move
      */
+
+    if (opponentsMove == nullptr) {
+        
+
+    }
+
     return nullptr;
 }
