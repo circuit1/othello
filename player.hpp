@@ -7,7 +7,8 @@
 using namespace std;
 
 class Player {
-
+private:
+	int position_score;
 public:
     Player(Side side);
     ~Player();

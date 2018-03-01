@@ -14,6 +14,13 @@ Player::Player(Side side) {
      * precalculating things, etc.) However, remember that you will only have
      * 30 seconds.
      */
+    Board *board = new Board();
+    //board position score = (# stones you have) - (# stones your opponent has)
+    Side opponent = WHITE;
+    if (side == WHITE){
+        opponent = BLACK;
+    }
+    position_score = board->count(side) - board->count(opponent);
 }
 
 /*
