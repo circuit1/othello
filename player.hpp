@@ -16,7 +16,7 @@ public:
     Player(Side side);
     ~Player();
 
-    int Heuristic();
+	int Heuristic(Move *my_move);
     Move *doMove(Move *opponentsMove, int msLeft);
 
     // Flag to tell if the player is running within the test_minimax context
