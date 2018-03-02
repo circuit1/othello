@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <map>
 #include "common.hpp"
 #include "board.hpp"
 using namespace std;
@@ -12,6 +13,7 @@ private:
 	int position_score;
 	Side s;
 	Board *board;
+	Side opponent;
 public:
     Player(Side side);
     ~Player();

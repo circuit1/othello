@@ -16,7 +16,7 @@ Player::Player(Side side) {
      */
     board = new Board();
     //board position score = (# stones you have) - (# stones your opponent has)
-    Side opponent = WHITE;
+    opponent = WHITE;
     if (side == WHITE) {
         opponent = BLACK;
     }
@@ -37,11 +37,7 @@ Player::~Player() {
  *
  */
 int Player::Heuristic(Move *my_move){
-    Side opponent = WHITE;
     int position_score, corner_score, moves_score;
-    if (s == WHITE) {
-        opponent = BLACK;
-    }
     // score for # of stones on board
     position_score = board->count(s) - board->count(opponent);
 
@@ -153,6 +149,48 @@ int Player::Heuristic(Move *my_move){
 }
 
 /*
+* Minimax
+*/
+
+int Player::minimax(Move *m, int depth, Side side){
+    Board *test_board = board->copy();
+    //if depth = 0 or node is a terminal node
+    if (depth == 0 || !test_board->hasMoves(side)){
+        //return the heuristic value of node
+        return Heuristic(m);
+    }
+    test_board->doMove(m, side);
+    //if maximizingPlayer (this player)
+    if (side == this->side){
+        int bestValue = -10000;
+        // For each child of node
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Move test_move(i, j);
+                if (test_board->checkMove(&test_move, this->side)){
+                    int val = minimax(&test_move, depth - 1, opponent);
+                    bestValue = max(bestValue, val);
+                    return bestValue;
+                }
+            }
+        }
+    }
+    else{ //minimizing player
+        int bestValue = 10000;
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Move test_move(i, j);
+                if (test_board->checkMove(&test_move, opponent)){
+                    int val = minimax(&test_move, depth - 1, this->side);
+                    bestValue = min(bestValue, val);
+                    return bestValue;
+                }
+            }
+        }
+    }
+}
+
+/*
  * Compute the next move given the opponent's last move. Your AI is
  * expected to keep track of the board on its own. If this is the first move,
  * or if the opponent passed on the last move, then opponentsMove will be
@@ -172,26 +210,31 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     // the move with the max heuristic
     if (board->hasMoves(s))
     {
-        int max_score = 0;
+        int max_score = -10000;
         Move move(0, 0);
         int x = 0;
         int y = 0;
-
+        std::map<int, *Move> my_moves;
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 Move test_move(i, j);
                 if (board->checkMove(&move, s)) {
+                    /*
                     if (Heuristic(&move) > max_score) {
                         max_score = Heuristic(&move);
                         move = test_move;
                         x = i;
                         y = j;
                     }
+                    */
+                    max_score = max(max_score, minimax(&test_move, 3, s));
+
+                    my_moves[max_score] = new Move(i,j);
                 } 
             }
         }
-
-        return new Move(x, y);
+        //return new Move(x, y);
+        return my_moves[max_score];
     }
 
     return nullptr;
