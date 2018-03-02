@@ -12,13 +12,13 @@ class Player {
 private:
 	int position_score;
 	Side s;
-	Board *board;
+	Board *game_board;
 	Side opponent;
 public:
     Player(Side side);
     ~Player();
 
-	int Heuristic(Move *my_move);
+	int Heuristic(Move *my_move, Board *board);
 	int minimax(Move *m, int depth, Side side);
     Move *doMove(Move *opponentsMove, int msLeft);
 
