@@ -50,8 +50,8 @@ int Player::Heuristic(){
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 Move move(i, j);
-                if (checkMove(&move, s)) my_moves++;
-                if (checkMove(&move, opponent)) num_op_moves++;
+                if (board->checkMove(&move, s)) my_moves++;
+                if (board->checkMove(&move, opponent)) num_op_moves++;
             }
         }
         moves_score = my_moves - num_op_moves;
@@ -123,7 +123,6 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
      * TODO: Implement how moves your AI should play here. You should first
      * process the opponent's opponents move before calculating your own move
      */
-
     // Randomly pick a valid move 
     if (board->hasMoves(s))
     {
