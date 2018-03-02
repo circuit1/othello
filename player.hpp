@@ -19,6 +19,7 @@ public:
     ~Player();
 
 	int Heuristic(Move *my_move);
+	int minimax(Move *m, int depth, Side side);
     Move *doMove(Move *opponentsMove, int msLeft);
 
     // Flag to tell if the player is running within the test_minimax context
