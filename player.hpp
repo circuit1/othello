@@ -18,12 +18,14 @@ public:
     Player(Side side);
     ~Player();
 
-	int Heuristic(Move *my_move, Board *board);
-	int minimax(Move *m, int depth, Side side);
+	int Heuristic(Board *board);
+	int minimax(Move *m, int depth, Side side, Board *board);
     Move *doMove(Move *opponentsMove, int msLeft);
-
+	int SimpleHeuristic(Board *board);
     // Flag to tell if the player is running within the test_minimax context
     bool testingMinimax;
+
+    void setBoard(char data[]);
 };
 
 #endif

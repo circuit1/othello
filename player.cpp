@@ -36,7 +36,7 @@ Player::~Player() {
  * Heuristic function takes a board position and returns a numeric "score"
  *
  */
-int Player::Heuristic(Move *my_move, Board *board){
+int Player::Heuristic(Board *board){
     int position_score, corner_score, moves_score;
     // score for # of stones on board
     position_score = board->count(s) - board->count(opponent);
@@ -44,15 +44,14 @@ int Player::Heuristic(Move *my_move, Board *board){
 
     // Score for # of possible moves after 
     // we make a move -> the more moves, the better
-    Board *test_board = board->copy();
-    test_board->doMove(my_move, s);
-    if (test_board->hasMoves(s)){
-        int num_op_moves = 0, my_moves = 0;
+    if (board->hasMoves(s)){
+        // int num_op_moves = 0;
+        int my_moves = 0;
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 Move move(i, j);
-                if (test_board->checkMove(&move, s)) my_moves++;
-                if (test_board->checkMove(&move, opponent)) num_op_moves++;
+                if (board->checkMove(&move, s)) my_moves++;
+                // if (board->checkMove(&move, opponent)) num_op_moves++;
             }
         }
         moves_score = my_moves;
@@ -74,15 +73,6 @@ int Player::Heuristic(Move *my_move, Board *board){
     if (board->get(s, 6, 6)) my_corners -= 5;
     if (board->get(opponent, 6, 6)) op_corners -= 5;
 
-    // Check if our inputted move is any of (1,1), (6,1), (1,6), (6, 6)
-    /*
-    int X = my_move->getX();
-    int Y = my_move->getY();
-    if (X == 1 && Y == 1) my_corners -= 5;
-    if (X == 6 && Y == 1) my_corners -= 5;
-    if (X == 1 && Y == 6) my_corners -= 5;
-    if (X == 6 && Y == 6) my_corners -= 5;
-    */
 
     // -5 score for (0,1), (1,0), (0,6), (6,0), (7,1), (1,7), (7, 6), (6,7)
     // which are adjacent to corners
@@ -104,34 +94,7 @@ int Player::Heuristic(Move *my_move, Board *board){
     if (board->get(opponent, 7, 6)) op_corners -= 5;
 
 
-    // Check (0,1), (1,0), (0,6), (6,0), (7,1), (1,7), (7, 6), (6,7)
-    // for our input
-    /*
-    if (X == 0 && Y == 1) my_corners -= 5;
-    if (X == 1 && Y == 0) my_corners -= 5;
-    if (X == 0 && Y == 6) my_corners -= 5;
-    if (X == 6 && Y == 0) my_corners -= 5;
-    if (X == 7 && Y == 1) my_corners -= 5;
-    if (X == 1 && Y == 7) my_corners -= 5;
-    if (X == 7 && Y == 6) my_corners -= 5;
-    if (X == 6 && Y == 7) my_corners -= 5;
-    */
-
-
-    // Check (0,1), (1,0), (0,6), (6,0), (7,1), (1,7), (7, 6), (6,7)
-    // for our input
-    /*
-    if (X == 0 && Y == 1) my_corners -= 3;
-    if (X == 1 && Y == 0) my_corners -= 3;
-    if (X == 0 && Y == 6) my_corners -= 3;
-    if (X == 6 && Y == 0) my_corners -= 3;
-    if (X == 7 && Y == 1) my_corners -= 3;
-    if (X == 1 && Y == 7) my_corners -= 3;
-    if (X == 7 && Y == 6) my_corners -= 3;
-    if (X == 6 && Y == 7) my_corners -= 3;
-    */
-
-    // +7 score for moves in corners
+    // // +7 score for moves in corners
     if (board->get(s, 0, 0)) my_corners += 10;
     if (board->get(opponent, 0, 0)) op_corners += 10;
     if (board->get(s, 0, 7)) my_corners += 10;
@@ -142,60 +105,68 @@ int Player::Heuristic(Move *my_move, Board *board){
     if (board->get(opponent, 7, 7)) op_corners += 10;
 
 
-
-    // Check our input for corner moves
-    /*
-    if (X == 0 && Y == 0) my_corners += 10;
-    if (X == 0 && Y == 7) my_corners += 10;
-    if (X == 7 && Y == 0) my_corners += 10;
-    if (X == 7 && Y == 7) my_corners += 10;
-    */
-
     corner_score = my_corners - op_corners;
+
+
     return position_score + 10 * corner_score + 20 * moves_score;
     
 }
 
+
+/**
+ * simple heuristic
+ */
+int Player::SimpleHeuristic(Board *board){
+    int position_score;
+    // score for # of stones on board
+    position_score = board->count(s) - board->count(opponent);
+    return position_score;
+
+}
 /*
 * Minimax
 */
 
-int Player::minimax(Move *m, int depth, Side side){
+int Player::minimax(Move *m, int depth, Side side, Board *board){
     Board *test_board = board->copy();
     test_board->doMove(m, side);
     //if depth = 0 or node is a terminal node
     if (depth == 0 || !test_board->hasMoves(side)){
         //return the heuristic value of node
-        return Heuristic(m, &test_board);
+        return Heuristic(test_board);
     }
+
+    // set bestValue to an arbitrarily small value
+    int bestValue = -1000000000; 
     //if maximizingPlayer (this player)
-    if (side == this->side){
-        int bestValue = -10000;
+    if (side == s){
+
         // For each child of node
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 Move test_move(i, j);
-                if (test_board->checkMove(&test_move, this->side)){
-                    int val = minimax(&test_move, depth - 1, opponent);
+                if (test_board->checkMove(&test_move, s)){
+                    int val = minimax(&test_move, depth - 1, 
+                                        opponent, test_board);
                     bestValue = max(bestValue, val);
-                    return bestValue;
                 }
             }
         }
     }
-    else{ //minimizing player
-        int bestValue = 10000;
+    else { //minimizing player
+       int bestValue = 1000000000; // arbitrarily large value
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 Move test_move(i, j);
-                if (test_board->checkMove(&test_move, opponent)){
-                    int val = minimax(&test_move, depth - 1, this->side);
+                if (test_board->checkMove(&test_move, opponent)) {
+                    int val = minimax(&test_move, depth - 1, 
+                                            s, test_board);
                     bestValue = min(bestValue, val);
-                    return bestValue;
                 }
             }
         }
     }
+    return bestValue;
 }
 
 /*
@@ -216,34 +187,35 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     // Pick a valid move based on the heuristic function
     // Iterate through all possible moves and choose
     // the move with the max heuristic
-    if (board->hasMoves(s))
+    if (game_board->hasMoves(s))
     {
-        int max_score = -10000;
-        Move move(0, 0);
-        int x = 0;
-        int y = 0;
-        std::map<int, *Move> my_moves;
+        int max_score = 0;
+        int x = 1;
+        int y = 1;
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 Move test_move(i, j);
-                if (board->checkMove(&move, s)) {
-                    /*
-                    if (Heuristic(&move) > max_score) {
-                        max_score = Heuristic(&move);
-                        move = test_move;
+                if (game_board->checkMove(&test_move, s)) {
+                    int new_max = minimax(&test_move, 2, s, game_board);
+                    if (new_max > max_score) {
+                        max_score = new_max;
                         x = i;
                         y = j;
                     }
-                    */
-                    max_score = max(max_score, minimax(&test_move, 3, s));
 
-                    my_moves[max_score] = new Move(i,j);
                 } 
             }
         }
-        //return new Move(x, y);
-        return my_moves[max_score];
+        return new Move(x, y);
     }
 
     return nullptr;
+}
+
+/**
+ * @brief set the board
+ */
+void Player::setBoard(char data[])
+{
+    game_board->setBoard(data);
 }
