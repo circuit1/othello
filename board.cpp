@@ -105,6 +105,7 @@ bool Board::checkMove(Move *m, Side side) {
  * Modifies the board to reflect the specified move.
  */
 void Board::doMove(Move *m, Side side) {
+    fprintf(stderr,"made move \n");
     // A nullptr move means pass.
     if (m == nullptr) return;
 
