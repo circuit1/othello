@@ -117,14 +117,14 @@ int Player::Heuristic(Board *board){
  * simple heuristic
  */
 int Player::SimpleHeuristic(Board *board){
-    printf("Called SimpleHeuristic\n");
+    fprintf(stderr,"Called SimpleHeuristic\n");
     int position_score;
     // score for # of stones on board
     if (s == WHITE) {
-        printf("Color is white\n");
+        fprintf(stderr,"Color is white\n");
     }
-    printf("You have: %d\n",board->count(s));
-    printf("Opponent has: %d\n", board->count(opponent));
+    fprintf(stderr,"You have: %d\n",board->count(s));
+    fprintf(stderr,"Opponent has: %d\n", board->count(opponent));
     position_score = board->count(s) - board->count(opponent);
     return position_score;
 
@@ -152,7 +152,7 @@ int Player::minimax(Move *m, int depth, Side side, Board *board){
     int bestValue = -1000000000; 
     //if maximizingPlayer (this player)
     if (side == s){
-        printf("Maximizing curr player\n");
+        fprintf(stderr,"Maximizing curr player\n");
         // For each child of node
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -166,7 +166,7 @@ int Player::minimax(Move *m, int depth, Side side, Board *board){
         }
     }
     else { //minimizing player
-        printf("minimizing player\n");
+       fprintf(stderr,"minimizing player\n");
        int bestValue = 1000000000; // arbitrarily large value
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -202,18 +202,20 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     // the move with the max heuristic
     if (game_board->hasMoves(s))
     {
-        printf("Has moves\n");
+        fprintf(stderr,"Has moves\n");
         int max_score = -1000000;
 
         // int x = 0;
         // int y = 0;
-        std::map<int, Move*> my_moves;
+        //std::map<int, Move*> my_moves;
+        int max_x = 0;
+        int max_y = 0;
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 Move test_move(i, j);
                 if (game_board->checkMove(&test_move, s)) {
-                    printf("i: %d\n", i);
-                    printf("j: %d\n", j);
+                    fprintf(stderr, "i: %d\n", i);
+                     fprintf(stderr,"j: %d\n", j);
                     /*
                     if (Heuristic(&move) > max_score) {
                         max_score = Heuristic(&move);
@@ -222,16 +224,20 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
                         y = j;
                     }
                     */
-                    int val = minimax(&test_move, 0, s, game_board);
-                    printf("minimax: %d\n", val);
-                    max_score = max(max_score, val);
+                    int val = minimax(&test_move, 2, s, game_board);
+                    fprintf(stderr,"minimax: %d\n", val);
+                    if (val > max_score){
+                    	max_score = val;
+                    	max_x = i;
+                    	max_y = j;
+                    }
 
-                    my_moves[max_score] = new Move(i,j);
+                    //my_moves[max_score] = new Move(i,j);
                 } 
             }
         }
         //return new Move(x, y);
-        return my_moves[max_score];
+        return new Move(max_x, max_y);
     }
 
     return nullptr;
