@@ -8,6 +8,7 @@
 Player::Player(Side side) {
     // Will be set to true in test_minimax.cpp.
     testingMinimax = false;
+    steps = 0;
 
     /*
      * TODO: Do any initialization you need to do here (setting up the board,
@@ -38,7 +39,7 @@ Player::~Player() {
  * Heuristic function takes a board position and returns a numeric "score"
  *
  */
-int Player::Heuristic(Board *board){
+int Player::Heuristic(Board *board, Side side){
     int position_score, corner_score, moves_score = 0;
     // score for # of stones on board
     position_score = board->count(s) - board->count(opponent);
@@ -46,69 +47,74 @@ int Player::Heuristic(Board *board){
 
     // Score for # of possible moves after 
     // we make a move -> the more moves, the better
-    /*
-    if (board->hasMoves(s)){
+    
+    if (board->hasMoves(side) && steps <= 30){
+
         //int num_op_moves = 0;
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 Move move(i, j);
-                if (board->checkMove(&move, s)) moves_score++;
+                if (board->checkMove(&move, side)) moves_score++;
                 //if (board->checkMove(&move, opponent)) num_op_moves++;
             }
         }
         //moves_score -= num_op_moves;
     }
+
+    if (side == opponent){
+        moves_score = -1 *moves_score;
+    }
     
-    */
 
     // Score for moves adjacent to corners
     // -10 score for (1,1), (6,1), (1,6), (6, 6) diagonal to corners
 
     int my_corners = 0, op_corners = 0;
+    if (steps >= 30){
+        if (board->get(s, 1, 1)) my_corners -= 5;
+        if (board->get(opponent, 1, 1)) op_corners -= 5;
+        if (board->get(s, 6, 1)) my_corners -= 5;
+        if (board->get(opponent, 6, 1)) op_corners -= 5;
+        if (board->get(s, 1, 6)) my_corners -= 5;
+        if (board->get(opponent, 1, 6)) op_corners -= 5;
+        if (board->get(s, 6, 6)) my_corners -= 5;
+        if (board->get(opponent, 6, 6)) op_corners -= 5;
+
+
+        // -5 score for (0,1), (1,0), (0,6), (6,0), (7,1), (1,7), (7, 6), (6,7)
+        // which are adjacent to corners
+
+        if (board->get(s, 0, 1)) my_corners -= 5;
+        if (board->get(opponent, 0, 1)) op_corners -= 5;
+        if (board->get(s, 0, 6)) my_corners -= 5;
+        if (board->get(opponent, 0, 6)) op_corners -= 5;
+        if (board->get(s, 1, 0)) my_corners -= 5;
+        if (board->get(opponent, 1, 0)) op_corners -= 5;
+        if (board->get(s, 1, 7)) my_corners -= 5;
+        if (board->get(opponent, 1, 7)) op_corners -= 5;
+        if (board->get(s, 6, 0)) my_corners -= 5;
+        if (board->get(opponent, 6, 0)) op_corners -= 5;
+        if (board->get(s, 6, 7)) my_corners -= 5;
+        if (board->get(opponent, 6, 7)) op_corners -= 5;
+        if (board->get(s, 7, 1)) my_corners -= 5;
+        if (board->get(opponent, 7, 1)) op_corners -= 5;
+        if (board->get(s, 7, 6)) my_corners -= 5;
+        if (board->get(opponent, 7, 6)) op_corners -= 5;
+        
+
+        // +10 score for moves in corners
+        /*
+        if (board->get(s, 0, 0)) my_corners += 10;
+        if (board->get(opponent, 0, 0)) op_corners += 10;
+        if (board->get(s, 0, 7)) my_corners += 10;
+        if (board->get(opponent, 0, 7)) op_corners += 10;
+        if (board->get(s, 7, 0)) my_corners += 10;
+        if (board->get(opponent, 7, 0)) op_corners += 10;
+        if (board->get(s, 7, 7)) my_corners += 10;
+        if (board->get(opponent, 7, 7)) op_corners += 10;
+        */
+    }
     
-    if (board->get(s, 1, 1)) my_corners -= 5;
-    if (board->get(opponent, 1, 1)) op_corners -= 5;
-    if (board->get(s, 6, 1)) my_corners -= 5;
-    if (board->get(opponent, 6, 1)) op_corners -= 5;
-    if (board->get(s, 1, 6)) my_corners -= 5;
-    if (board->get(opponent, 1, 6)) op_corners -= 5;
-    if (board->get(s, 6, 6)) my_corners -= 5;
-    if (board->get(opponent, 6, 6)) op_corners -= 5;
-
-
-    // -5 score for (0,1), (1,0), (0,6), (6,0), (7,1), (1,7), (7, 6), (6,7)
-    // which are adjacent to corners
-    /*
-    if (board->get(s, 0, 1)) my_corners -= 5;
-    if (board->get(opponent, 0, 1)) op_corners -= 5;
-    if (board->get(s, 0, 6)) my_corners -= 5;
-    if (board->get(opponent, 0, 6)) op_corners -= 5;
-    if (board->get(s, 1, 0)) my_corners -= 5;
-    if (board->get(opponent, 1, 0)) op_corners -= 5;
-    if (board->get(s, 1, 7)) my_corners -= 5;
-    if (board->get(opponent, 1, 7)) op_corners -= 5;
-    if (board->get(s, 6, 0)) my_corners -= 5;
-    if (board->get(opponent, 6, 0)) op_corners -= 5;
-    if (board->get(s, 6, 7)) my_corners -= 5;
-    if (board->get(opponent, 6, 7)) op_corners -= 5;
-    if (board->get(s, 7, 1)) my_corners -= 5;
-    if (board->get(opponent, 7, 1)) op_corners -= 5;
-    if (board->get(s, 7, 6)) my_corners -= 5;
-    if (board->get(opponent, 7, 6)) op_corners -= 5;
-    
-    */
-
-    // +10 score for moves in corners
-
-    if (board->get(s, 0, 0)) my_corners += 10;
-    if (board->get(opponent, 0, 0)) op_corners += 10;
-    if (board->get(s, 0, 7)) my_corners += 10;
-    if (board->get(opponent, 0, 7)) op_corners += 10;
-    if (board->get(s, 7, 0)) my_corners += 10;
-    if (board->get(opponent, 7, 0)) op_corners += 10;
-    if (board->get(s, 7, 7)) my_corners += 10;
-    if (board->get(opponent, 7, 7)) op_corners += 10;
-
     corner_score = my_corners - op_corners;
     //corner_score = my_corners;
 
@@ -154,7 +160,7 @@ int Player::minimax(Move *m, int depth, Side side, Board *board){
             return SimpleHeuristic(test_board);
         }
         else {
-            return Heuristic(test_board);
+            return Heuristic(test_board, side);
         }
 
     }
@@ -211,6 +217,7 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     // Pick a valid move based on the heuristic function
     // Iterate through all possible moves and choose
     // the move with the max heuristic
+    steps +=2 ;
     if (game_board->hasMoves(s))
     {
         fprintf(stderr,"Has moves\n");

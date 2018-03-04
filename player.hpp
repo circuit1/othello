@@ -14,11 +14,12 @@ private:
 	Side s;
 	Board *game_board;
 	Side opponent;
+	int steps;
 public:
     Player(Side side);
     ~Player();
 
-	int Heuristic(Board *board);
+	int Heuristic(Board *board, Side side);
 	int minimax(Move *m, int depth, Side side, Board *board);
     Move *doMove(Move *opponentsMove, int msLeft);
 	int SimpleHeuristic(Board *board);
