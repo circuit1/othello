@@ -39,26 +39,25 @@ Player::~Player() {
 int Player::Heuristic(Board *board, Side side){
     int position_score, corner_score, moves_score = 0;
     // score for # of stones on board
-    position_score = board->count(s) - board->count(opponent);
+    position_score = 2*board->count(s) - 2*board->count(opponent);
 
 
     // Score for # of possible moves after 
     // we make a move -> the more moves, the better
     
-    if (board->hasMoves(side) && steps <= 30){
+    if (board->hasMoves(side) && steps <= 24){
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 Move move(i, j);
-                if (board->checkMove(&move, side)) moves_score++;
-
+                if (board->checkMove(&move, side)) moves_score += 3;
             }
         }
-
-    }
-
-    if (side == opponent){
-        moves_score = -1 * moves_score;
+        
+        if (side == opponent){
+            moves_score = -moves_score;
+        }
+        
     }
     
 
@@ -66,7 +65,7 @@ int Player::Heuristic(Board *board, Side side){
     // -10 score for (1,1), (6,1), (1,6), (6, 6) diagonal to corners
 
     int my_corners = 0, op_corners = 0;
-    if (steps >= 30){
+    if (steps >= 18){
         if (board->get(s, 1, 1)) my_corners -= 5;
         if (board->get(opponent, 1, 1)) op_corners -= 5;
         if (board->get(s, 6, 1)) my_corners -= 5;
@@ -172,6 +171,60 @@ int Player::minimax(Move *m, int depth, Side side, Board *board){
     return bestValue;
 }
 
+
+/* 
+*Implementation of minimax with alpha beta pruning
+*/
+int Player::alpha_beta(Move *m, int depth, int alpha, int beta, Side side, Board *board){
+    Board *test_board = board->copy();
+    test_board->doMove(m, side);
+
+    //if depth = 0 or node is a terminal node
+    if (depth <= 0 || test_board->isDone()){
+
+        //return the heuristic value of node
+        return Heuristic(test_board, side);
+    }
+    if (side == s){
+        int bestValue = -1000000000;
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Move test_move(i, j);
+                if (test_board->checkMove(&test_move, opponent)){
+                    bestValue = max(bestValue, alpha_beta(&test_move, depth - 1, alpha, beta,
+                                        opponent, test_board));
+                    alpha = max(alpha, bestValue);
+                    if (beta <= alpha){
+                        break;
+                    }
+                }
+           
+            }
+        }
+        return bestValue;
+    }
+    else if (side == opponent){ //minimizing player
+        int bestValue = 1000000000; // arbitrarily large value
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Move test_move(i, j);
+                if (test_board->checkMove(&test_move, s)) {
+                    bestValue = min(bestValue, alpha_beta(&test_move, depth - 1, 
+                        alpha, beta, s, test_board));
+                    beta = min(beta, bestValue);
+                    if (beta <= alpha){
+                        break;
+                    }
+
+                }
+            }
+        }
+        return bestValue;
+    }
+    return 0;
+}
+
+
 /*
  * Compute the next move given the opponent's last move. Your AI is
  * expected to keep track of the board on its own. If this is the first move,
@@ -191,27 +244,34 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     // Iterate through all possible moves and choose
     // the move with the max heuristic
     steps +=2 ;
+
     if (game_board->hasMoves(s))
     {
         int max_score = -1000000;
 
-
         int max_x = 0;
         int max_y = 0;
+        int depth = 4;
+        while( msLeft > 0) {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 Move test_move(i, j);
                 if (game_board->checkMove(&test_move, s)) {
 
-                    int val = minimax(&test_move, 4, s, game_board);
-                    if (val > max_score){
-                    	max_score = val;
-                    	max_x = i;
-                    	max_y = j;
+                    //int val = minimax(&test_move, 4, s, game_board);
+                
+                       int val = alpha_beta(&test_move, depth, -100000000, +100000000, s, game_board);
+                       if (val > max_score){
+                            max_score = val;
+                            max_x = i;
+                            max_y = j;
+                        }
+
                     }
 
                 } 
             }
+            depth ++;
         }
         return new Move(max_x, max_y);
     }

@@ -21,6 +21,7 @@ public:
 
 	int Heuristic(Board *board, Side side);
 	int minimax(Move *m, int depth, Side side, Board *board);
+	int alpha_beta(Move *m, int depth, int alpha, int beta, Side side, Board *board);
     Move *doMove(Move *opponentsMove, int msLeft);
 	int SimpleHeuristic(Board *board);
     // Flag to tell if the player is running within the test_minimax context
