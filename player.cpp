@@ -175,7 +175,8 @@ int Player::minimax(Move *m, int depth, Side side, Board *board){
 /* 
 *Implementation of minimax with alpha beta pruning
 */
-int Player::alpha_beta(Move *m, int depth, int alpha, int beta, Side side, Board *board){
+int Player::alpha_beta(Move *m, int depth, int alpha, 
+                        int beta, Side side, Board *board){
     Board *test_board = board->copy();
     test_board->doMove(m, side);
 
@@ -210,7 +211,7 @@ int Player::alpha_beta(Move *m, int depth, int alpha, int beta, Side side, Board
                 Move test_move(i, j);
                 if (test_board->checkMove(&test_move, s)) {
                     bestValue = min(bestValue, alpha_beta(&test_move, depth - 1, 
-                        alpha, beta, s, test_board));
+                                                    alpha, beta, s, test_board));
                     beta = min(beta, bestValue);
                     if (beta <= alpha){
                         break;
@@ -252,7 +253,7 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
         int max_x = 0;
         int max_y = 0;
         int depth = 4;
-        while( msLeft > 0) {
+        while(msLeft > 0) {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 Move test_move(i, j);
@@ -260,7 +261,8 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
 
                     //int val = minimax(&test_move, 4, s, game_board);
                 
-                       int val = alpha_beta(&test_move, depth, -100000000, +100000000, s, game_board);
+                       int val = alpha_beta(&test_move, depth, -100000000, 
+                                            +100000000, s, game_board);
                        if (val > max_score){
                             max_score = val;
                             max_x = i;
